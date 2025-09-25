@@ -27,6 +27,12 @@ func CriaNovoAluno(c *gin.Context) {
 		})
 		return
 	}
+	if err := models.ValidaDadosDeAlunos(&novoAluno); err != nil {
+		c.JSON(400, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
 	database.DB.Create(&novoAluno)
 	c.JSON(200, novoAluno)
 }
@@ -72,7 +78,14 @@ func EditaAluno(c *gin.Context) {
 		})
 		return
 	}
-	
+
+	if err := models.ValidaDadosDeAlunos(&aluno); err != nil {
+		c.JSON(400, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
 	database.DB.Model(&aluno).UpdateColumns(aluno)
 	c.JSON(200, aluno)
 }
@@ -88,4 +101,16 @@ func ExibeAlunoPorCurso(c *gin.Context) {
 		return
 	}
 	c.JSON(200, alunos)
+}
+
+func Index(c *gin.Context) {
+	var alunos []models.Aluno
+	database.DB.Find(&alunos)
+	c.HTML(200, "index.html", gin.H{
+		"alunos": alunos,
+	})
+}
+
+func RotaNaoEncontrada(c *gin.Context) {
+	c.HTML(404, "404.html", nil)
 }
